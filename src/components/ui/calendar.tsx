@@ -8,6 +8,7 @@ import {
   type DayButton,
   type Locale,
 } from "react-day-picker"
+import { enIN } from "date-fns/locale"
 
 import { Button, buttonVariants } from "@/components/ui/button"
 import { ChevronLeftIcon, ChevronRightIcon, ChevronDownIcon } from "lucide-react"
@@ -18,7 +19,7 @@ function Calendar({
   showOutsideDays = true,
   captionLayout = "label",
   buttonVariant = "ghost",
-  locale,
+  locale = enIN,
   formatters,
   components,
   ...props
@@ -162,7 +163,7 @@ function Calendar({
           )
         },
         DayButton: ({ ...props }) => (
-          <CalendarDayButton locale={locale} {...props} />
+          <CalendarDayButton {...props} locale={locale} />
         ),
         WeekNumber: ({ children, ...props }) => {
           return (

@@ -48,4 +48,17 @@ Warm, minimal, calm — inspired by Claude's interface. Tokens live in
 - Supabase CLI config is in `supabase/config.toml`; migrations in
   `supabase/migrations/`. Generate types with
   `npx supabase gen types typescript --local > src/lib/database.types.ts`.
+- shadcn/ui here is built on **Base UI** (`@base-ui/react`), not Radix.
+  - To render a custom element as a trigger/close button, use the `render`
+    prop (`<DialogTrigger render={<Button variant="outline" />}>Label</DialogTrigger>`),
+    not `asChild`. Put the visible content as children of the primitive, not
+    inside the `render` element — Base UI merges them.
+  - `Select`'s `SelectValue` shows the raw value string by default; it does
+    NOT auto-read the matching `SelectItem`'s children like Radix did. Pass
+    an `items={{ value: "Label" }}` map to the `Select` root (or a render
+    function as `SelectValue`'s children) so the trigger shows the label.
+  - The default theme (light/dark) is controlled by `next-themes` in
+    `src/app/layout.tsx` — currently pinned to light (`defaultTheme="light"`,
+    `enableSystem={false}`) per product decision; `ThemeToggle` still lets
+    users switch to dark.
 
