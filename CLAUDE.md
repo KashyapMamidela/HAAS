@@ -65,3 +65,39 @@ Warm, minimal, calm — inspired by Claude's interface. Tokens live in
     `enableSystem={false}`) per product decision; `ThemeToggle` still lets
     users switch to dark.
 
+## Database (Phase 2)
+
+- Schema lives in `supabase/migrations/`, applied in filename order:
+  extensions -> enums -> tables -> functions/triggers -> RLS -> booking RPCs.
+  `supabase/seed.sql` creates 4 departments, 6 doctors (with weekly
+  schedules) and 3 patients, plus 1 admin — every seeded account's password
+  is `password123`.
+- **Booking and availability are RPC-only, never raw inserts**: call
+  `book_appointment(p_doctor_id, p_start_at, p_reason)` to create an
+  appointment and `get_available_slots(p_doctor_id, p_date)` to list free
+  slots. Both are `SECURITY DEFINER` because they must see every booking
+  for that doctor (not just the caller's own) to validate correctly — RLS
+  on `appointments` intentionally has no patient-facing insert policy.
+  Cancel/reschedule RPCs don't exist yet; add them the same way rather than
+  updating `appointments` directly from a patient-facing server action.
+- A doctor CAN update their own `appointments` rows directly (RLS allows
+  it) for queue status transitions (checked_in -> in_consultation ->
+  completed/no_show) — no RPC needed there since it doesn't touch time/
+  overlap validation.
+- `doctor_schedules.weekday` is `0`=Sunday..`6`=Saturday
+  (`extract(dow from ...)`), and `start_time`/`end_time` are wall-clock
+  **Asia/Kolkata** times, not UTC — both RPCs convert explicitly.
+- Role changes (patient -> doctor/admin) only ever happen via `UPDATE
+  profiles SET role = ...` run by a trusted server context (service-role
+  admin client or seed.sql). The `handle_new_user` trigger always creates
+  new profiles as `'patient'`, matching "no public sign-up" for doctor/admin.
+- `src/lib/database.types.ts` is currently **hand-written** to match the
+  migrations (no live database was available to run `supabase gen types`
+  yet). Regenerate it once a local (`supabase start`) or linked project
+  exists, and diff — it should be a near no-op if the schema matches.
+- The Custom Access Token Hook (`public.custom_access_token_hook`) is
+  enabled for local dev via `supabase/config.toml`
+  (`[auth.hook.custom_access_token]`). On a hosted project this must also
+  be turned on manually from the dashboard: Authentication -> Hooks ->
+  Customize Access Token, pointing at `public.custom_access_token_hook`.
+
