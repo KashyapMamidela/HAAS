@@ -53,6 +53,9 @@ Warm, minimal, calm — inspired by Claude's interface. Tokens live in
     prop (`<DialogTrigger render={<Button variant="outline" />}>Label</DialogTrigger>`),
     not `asChild`. Put the visible content as children of the primitive, not
     inside the `render` element — Base UI merges them.
+  - When `Button` itself renders as a link (`<Button render={<Link href="..."/>}>`),
+    also pass `nativeButton={false}` — otherwise Base UI logs an a11y warning
+    because it expects `render` to produce a real `<button>` by default.
   - `Select`'s `SelectValue` shows the raw value string by default; it does
     NOT auto-read the matching `SelectItem`'s children like Radix did. Pass
     an `items={{ value: "Label" }}` map to the `Select` root (or a render

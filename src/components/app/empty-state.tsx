@@ -33,7 +33,7 @@ export function EmptyState({
       </div>
       {action &&
         (action.href ? (
-          <Button size="sm" render={<a href={action.href} />}>
+          <Button size="sm" nativeButton={false} render={<a href={action.href} />}>
             {action.label}
           </Button>
         ) : (
